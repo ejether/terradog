@@ -1,5 +1,8 @@
 FROM python:3-slim
 
+RUN apt-get update \
+    && apt-get install git -y \
+    && rm -rf /var/lib/apt/lists/*
 RUN useradd -m terradoguser
 
 RUN chown -R terradoguser:terradoguser /home/terradoguser
