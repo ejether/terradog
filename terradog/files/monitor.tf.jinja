@@ -1,0 +1,68 @@
+
+resource "datadog_monitor" "{{ resource_name }}" {
+  # Required Arguments
+  name = "{{ name }}"
+  type = "{{ type }}"
+
+  message = <<EOF
+  {{ message }}
+  EOF
+  query = "{{ query | trim }}"
+
+  # Optional Arguments
+  {%- if escalation_message %}
+  escalation_message = <<EOF
+  {{ escalation_message }}
+  EOF
+  {%- endif %}
+  {%- if notify_no_data %}
+  notify_no_data    = {{ notify_no_data|lower }}
+  {%- endif %}
+  {%- if no_data_timeframe %}
+  no_data_timeframe = {{ no_data_timeframe }}
+  {%- endif %}
+  {%- if new_host_delay %}
+  new_host_delay = {{ new_host_delay }}
+  {%- endif %}
+  {%- if thresholds %}
+  thresholds = {
+    {%- for key in thresholds %}
+    {{ key }} = {{ thresholds[key] }}
+    {%- endfor %}
+  }
+  {%- endif %}
+    {%- if threshold_windows %}
+  threshold_windows = {
+    {%- for key in threshold_windows %}
+    {{ key }} = "{{ threshold_windows[key] }}"
+    {%- endfor %}
+  }
+  {%- endif %}
+  {%- if evaluation_delay %}
+  evaluation_delay = {{ evaluation_delay }}
+  {%- endif %}
+  {%- if notify_data_timeframe %}
+  notify_data_timeframe = {{ notify_data_timeframe }}
+  {%- endif %}
+  {%- if renotify_interval %}
+  renotify_interval = {{ renotify_interval }}
+  {%- endif %}
+  {%- if notify_audit %}
+  notify_audit = {{ notify_audit|lower }}
+  {%- endif %}
+  {%- if timeout_h %}
+  timeout_h    = {{ timeout_h }}
+  {%- endif %}
+  {%- if include_tags %}
+  include_tags = {{ include_tags|lower }}
+  {%- endif %}
+  {%- if require_full_window %}
+  require_full_window = {{ require_full_window|lower }}
+  {%- endif %}
+  {%- if locked %}
+  locked = {{ locked }}
+  {%- endif %}
+  {%- if tags %}
+  tags = {{ tags | tojson }}
+  {%- endif %}
+}

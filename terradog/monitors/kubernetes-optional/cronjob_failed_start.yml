@@ -1,0 +1,25 @@
+notify_audit: false
+locked: false
+name: '[${environment}] CronJob Start Failure'
+tags: ['${environment}', reactiveops]
+include_tags: false
+no_data_timeframe: 120
+silenced: {}
+require_full_window: true
+notify_no_data: true
+renotify_interval: 0
+type: event alert
+query: "events('sources:kubernetes priority:all tags:${cluster_tag}:${cluster} \"FailedNeedsStart\"').rollup('count').last('1h') > ${cronjob_failed_start_threshold}"
+message: |
+  {{#is_alert}}
+  A cronjob controller cannot determine if a job needs to be started. Has a job been failing to start within spec.startingDeadlineSeconds?
+  {{/is_alert}}
+  {{#is_alert_recovery}}
+  The cronjob start failure has recovered.
+  {{/is_alert_recovery}}
+  ${notifications}
+definition_defaults:
+  cronjob_failed_start_threshold: 1
+  #This threshold is set to 1, because typically you'll see this event bubble up repeatedly and typically trigger >1 times per hour when something is wrong.
+  #If this isn't a sensitive enough check for your environment, override this value and adjust down to 0.
+  cluster_tag: kubernetescluster

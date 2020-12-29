@@ -1,0 +1,28 @@
+notify_audit: false
+locked: false
+name: '[${environment}] Nginx Config Reload Failure'
+tags: ['${environment}']
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: true
+notify_no_data: true
+renotify_interval: 0
+escalation_message: ''
+query: max(last_5m):max:ingress.nginx_ingress_controller_config_last_reload_successful{${cluster_tag}:${cluster}${nginx_config_reload_failure_additional_filters}} by {kube_deployment} <= 0
+message: |
+  {{#is_alert}}
+  The last nginx config reload for {{kube_deployment.name}} failed!  Are there any bad ingress configs?  Does the nginx config have a syntax error?
+  {{/is_alert}}
+  {{#is_recovery}}
+  Nginx config reloaded successfully!
+  {{/is_recovery}}
+  ${notifications}
+type: metric alert
+thresholds:
+  critical: 0
+timeout_h: 0
+definition_defaults:
+  nginx_config_reload_failure_additional_filters: ""
+  cluster_tag: kubernetescluster

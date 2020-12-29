@@ -1,0 +1,13 @@
+*.egg-info
+.DS_Store
+*.pyc
+*.pem
+*.pub
+.vscode
+venv
+build
+.coverage
+coverage*
+__pycache__
+.pytest_cache
+pentagon/tests/golden/*/*/.versions.yaml

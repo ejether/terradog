@@ -1,0 +1,103 @@
+# List of Monitor Families and Monitors
+- Kubernetes Optional
+    - [Hpa Failure](/terradog/monitors/hpa_failure.yml)
+         - Required Definitions:
+            - `cluster`
+            - `environment`
+            - `low_urgency_notifications`
+            - `notifications`
+         - Optional Definitions: (default)
+            - `hpa_failure_critical_threshold`: 200
+            - `hpa_failure_renotify_interval`: 15
+            - `hpa_failure_query_window`: 15m
+            - `cluster_tag`: kubernetescluster
+    - [Kube State Metrics Missing](/terradog/monitors/kube_state_metrics_missing.yml)
+         - Required Definitions:
+            - `cluster`
+            - `environment`
+            - `notifications`
+         - Optional Definitions: (default)
+            - `cluster_tag`: kubernetescluster
+    - [Cluster Memory](/terradog/monitors/cluster_memory.yml)
+         - Required Definitions:
+            - `cluster`
+            - `environment`
+            - `low_urgency_notifications`
+            - `notifications`
+         - Optional Definitions: (default)
+            - `cluster_memory_critical_threshold`: 0.1
+            - `cluster_memory_critical_warning`: 0.15
+            - `cluster_tag`: kubernetescluster
+    - [Daemonset Readiness](/terradog/monitors/daemonset_readiness.yml)
+         - Required Definitions:
+            - `cluster`
+            - `environment`
+            - `namespace`
+            - `notifications`
+         - Optional Definitions: (default)
+            - `daemonset_readiness_critical_threshold`: 0
+            - `namespaces`: ['kube-system']
+            - `cluster_tag`: kubernetescluster
+    - [Statefulset Readiness](/terradog/monitors/statefulset_readiness.yml)
+         - Required Definitions:
+            - `cluster`
+            - `environment`
+            - `namespace`
+            - `notifications`
+         - Optional Definitions: (default)
+            - `statefulset_readiness_critical_threshold`: 0
+            - `namespaces`: ['kube-system']
+            - `cluster_tag`: kubernetescluster
+    - [System Load Average High](/terradog/monitors/system_load_average_high.yml)
+         - Required Definitions:
+            - `cluster`
+            - `environment`
+            - `notifications`
+         - Optional Definitions: (default)
+            - `system_load_average_critical_threshold`: 2
+            - `system_load_average_additional_filters`: 
+            - `cluster_tag`: kubernetescluster
+    - [Pods Failed](/terradog/monitors/pods_failed.yml)
+         - Required Definitions:
+            - `cluster`
+            - `environment`
+            - `notifications`
+         - Optional Definitions: (default)
+            - `pods_failed_critical_threshold`: 50
+            - `cluster_tag`: kubernetescluster
+    - [Deployment Readiness](/terradog/monitors/deployment_readiness.yml)
+         - Required Definitions:
+            - `cluster`
+            - `environment`
+            - `namespace`
+            - `notifications`
+         - Optional Definitions: (default)
+            - `deploy_replica_alert_critical_threshold`: 0
+            - `namespaces`: ['kube-system']
+            - `cluster_tag`: kubernetescluster
+    - [Cluster Network Errors](/terradog/monitors/cluster_network_errors.yml)
+         - Required Definitions:
+            - `cluster`
+            - `environment`
+            - `notifications`
+         - Optional Definitions: (default)
+            - `cluster_network_errors_critical_threshold`: 10
+            - `cluster_network_errors_warning_threshold`: 5
+            - `cluster_tag`: kubernetescluster
+    - [Job Failure](/terradog/monitors/job_failure.yml)
+         - Required Definitions:
+            - `cluster`
+            - `environment`
+            - `namespace`
+            - `notifications`
+         - Optional Definitions: (default)
+            - `namespaces`: ['kube-system']
+            - `cluster_tag`: kubernetescluster
+    - [Cronjob Failed Start](/terradog/monitors/cronjob_failed_start.yml)
+         - Required Definitions:
+            - `cluster`
+            - `environment`
+            - `notifications`
+         - Optional Definitions: (default)
+            - `cronjob_failed_start_threshold`: 1
+            - `cluster_tag`: kubernetescluster

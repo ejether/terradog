@@ -1,0 +1,29 @@
+notify_audit: false
+locked: false
+name: '[${environment}] Certificate Expiration'
+tags: ['${environment}', cert-manager]
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: false
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+vary_by_namespace: false
+query: max(last_1h):max:cert_manager.certmanager_certificate_expiration_timestamp_seconds{${cluster_tag}:${cluster}} by {name} - max:fairwinds_metrics.fairwinds_epoch_time{*} < ${cert_expiring_critical_threshold}
+message: |
+  {{#is_alert}}
+  Certificate {{name.name}} expires in 14 days!
+  {{/is_alert}}
+  {{#is_recovery}}
+  Certificate {{name.name}} expiration has recovered.
+  {{/is_recovery}}
+  ${low_urgency_notifications}
+type: metric alert
+thresholds:
+  critical: ${cert_expiring_critical_threshold}
+timeout_h: 0
+definition_defaults:
+  cert_expiring_critical_threshold: 1209600
+  cluster_tag: kubernetescluster

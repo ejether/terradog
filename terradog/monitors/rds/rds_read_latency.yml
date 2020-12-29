@@ -1,0 +1,16 @@
+notify_audit: false
+locked: false
+name: '[${environment}] RDS Read Latency is outside the expected norm'
+include_tags: false
+tags: ['${environment}']
+no_data_timeframe: null
+new_host_delay: 300
+require_full_window: true
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+query: avg(last_1h):anomalies(avg:aws.rds.read_latency{dbinstanceidentifier:${dbinstanceidentifier}},'agile', 4, direction='above', seasonality='daily') > 0.5
+message: '${notifications}'
+type: query alert
+thresholds: {critical: 0.5}
+timeout_h: 0

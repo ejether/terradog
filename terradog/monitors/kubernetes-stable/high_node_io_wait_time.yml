@@ -1,0 +1,34 @@
+notify_audit: false
+locked: false
+name: '[${environment}] I/O wait times are high'
+tags: ['${environment}']
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: true
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+query: avg(last_10m):avg:system.cpu.iowait{${cluster_tag}:${cluster}${high_node_io_wait_time_additional_filters}} by {host} > ${high_node_io_wait_time_critical_threshold}
+message: |
+  {{#is_alert}}
+  The I/O wait time for {host.ip} is very high
+  - Is the EBS volume out of burst capacity for iops?
+  - Is something writing lots of errors to the journal?
+  - Is there a pod doing something unexpected (crash looping, etc)?
+  {{/is_alert}}
+  {{^is_alert}}
+  The IO wait time is returning to normal.
+  {{/is_alert}}
+  ${notifications}
+type: metric alert
+thresholds:
+  critical: ${high_node_io_wait_time_critical_threshold}
+  warning: ${high_node_io_wait_time_warning_threshold}
+timeout_h: 0
+definition_defaults:
+  high_node_io_wait_time_additional_filters: ""
+  high_node_io_wait_time_critical_threshold: 50
+  high_node_io_wait_time_warning_threshold: 30
+  cluster_tag: kubernetescluster

@@ -1,0 +1,18 @@
+notify_audit: false
+locked: false
+name: '[${environment}] Elasticsearch cluster state is bad'
+tags: ['*']
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: true
+notify_no_data: false
+renotify_interval: 0
+evaluation_delay: 900
+escalation_message: ''
+query: avg(last_1h):avg:aws.es.cluster_statusred{domainname:${elasticsearchdomain}} > 1
+message: '${notifications}'
+type: query alert
+thresholds: {critical: 1, warning: 0.4, warning_recovery: 0.2, critical_recovery: 0}
+timeout_h: 0

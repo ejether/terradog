@@ -1,0 +1,31 @@
+notify_audit: false
+locked: false
+name: '[${environment}] Deployment readiness in ${namespace}'
+tags: ['${environment}']
+include_tags: true
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: false
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+vary_by_namespace: true
+query: min(last_30m):max:kubernetes_state.deployment.replicas_unavailable{${cluster_tag}:${cluster},namespace:${namespace}} by {deployment} > ${deploy_replica_alert_critical_threshold}
+message: |
+  {{#is_alert}}
+  Unavailable replicas has been above ${deploy_replica_alert_critical_threshold} for {{deployment.name}}
+  {{/is_alert}}
+  {{^is_alert}}
+  Unavailable replicas is back to ${deploy_replica_alert_critical_threshold} for {{deployment.name}}
+  {{/is_alert}}
+  ${notifications}
+type: query alert
+thresholds:
+  critical: ${deploy_replica_alert_critical_threshold}
+timeout_h: 0
+definition_defaults:
+  deploy_replica_alert_critical_threshold: 0
+  namespaces:
+  - kube-system
+  cluster_tag: kubernetescluster

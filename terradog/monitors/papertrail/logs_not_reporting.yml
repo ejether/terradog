@@ -1,0 +1,24 @@
+notify_audit: false
+locked: false
+name: '[${environment}] papertrail log data below normal'
+tags: ['${environment}', reactiveops]
+include_tags: true
+no_data_timeframe: 10
+silenced: {}
+new_host_delay: 300
+require_full_window: true
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+query: "avg(last_1d):anomalies(sum:${metric_name}{*}, 'robust', 3, direction='below', alert_window='last_1h', interval=300, count_default_zero='true', seasonality='hourly') >= 1"
+message: |
+  Papertrail log data has been below normal during the last hour. Check to see if papertrail logs are properly working. 
+  ${low_urgency_notifications}
+type: metric alert
+thresholds:
+  critical: 1
+  critical_recovery: 0
+threshold_windows:
+  trigger_window: "last_1h"
+  recovery_window: "last_15m"
+timeout_h: 0

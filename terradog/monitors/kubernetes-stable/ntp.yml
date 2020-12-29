@@ -1,0 +1,18 @@
+notify_audit: false
+locked: false
+name: '[${environment}] Clock in sync with NTP'
+tags: ['${environment}']
+thresholds: {warning: 3, ok: 1, critical: 5}
+silenced: {}
+new_host_delay: 300
+notify_no_data: false
+renotify_interval: 0
+query: '"ntp.in_sync".over("${cluster_tag}:${cluster}").by("host").last(6).count_by_status()'
+message: |
+  Triggers if any host's clock goes out of sync with the time given by NTP.
+  ${notifications}
+type: service check
+no_data_timeframe: 2
+timeout_h: 0
+definition_defaults:
+  cluster_tag: kubernetescluster

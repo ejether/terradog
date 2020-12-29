@@ -1,0 +1,32 @@
+notify_audit: false
+locked: false
+name: '[${environment}] Increased pod crashes ${namespace}'
+tags: ['${environment}']
+include_tags: true
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: false
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+vary_by_namespace: true
+query: change(avg(last_5m),last_1h):max:kubernetes_state.container.restarts{${cluster_tag}:${cluster},namespace:${namespace}${pod_crashes_additional_filters}} by {pod} >= ${pod_crashes_critical_threshold}
+message: |
+  {{#is_alert}}
+  {{pod.name}} has crashed repeatedly over the last hour
+  {{/is_alert}}
+  {{^is_alert}}
+  {{pod.name}} appears to have stopped crashing
+  {{/is_alert}}
+  ${notifications}
+type: metric alert
+thresholds:
+  critical: ${pod_crashes_critical_threshold}
+timeout_h: 0
+definition_defaults:
+  pod_crashes_critical_threshold: 1
+  pod_crashes_additional_filters: ',!container:metadata-agent,!container:prometheus-to-sd,!container:fluentd-gcp'
+  namespaces: 
+  - kube-system
+  cluster_tag: kubernetescluster

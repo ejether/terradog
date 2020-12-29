@@ -1,0 +1,19 @@
+notify_audit: false
+locked: false
+name: '[${environment}] Database memory is low'
+tags: ['${environment}']
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: true
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+query: max(last_1h):avg:aws.rds.freeable_memory{dbinstanceclass:db.r3.xlarge} by {dbinstanceidentifier} < 1073741824
+message: |
+  {{#is_alert}} Database memory is low {{/is_alert}} 
+  ${notifications}
+type: metric alert
+thresholds: {critical: 1073741824, warning: 2147483648}
+timeout_h: 0

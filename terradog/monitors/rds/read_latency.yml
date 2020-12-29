@@ -1,0 +1,17 @@
+notify_audit: false
+locked: false
+name: '[${environment}] High RDS read latency on {{dbinstanceidentifier.name}}'
+tags: ['${environment}', rds]
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: true
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+query: avg(last_10m):avg:aws.rds.read_latency{*} by {dbinstanceidentifier} > 0.022
+message: '${notifications}'
+type: metric alert
+thresholds: {critical: 0.022, warning: 0.018}
+timeout_h: 0

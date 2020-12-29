@@ -1,0 +1,22 @@
+notify_audit: false
+locked: false
+name: "[${environment}]Low Burst IOPS on database {{dbinstanceidentifier.name}}"
+tags: ['${environment}']
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+require_full_window: true
+new_host_delay: 300
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+query: avg(last_15m):avg:aws.rds.burst_balance{*} by {dbinstanceidentifier} < 25
+message: |
+  When the IOPS burst balance reaches 0, latency will likely increase dramatically and lead to significant performance problems.
+    - Does disk size need to be increased to add IOPS?
+    - Was there a recent change to cause increased usage?
+    - Is there a bad query somewhere that can be adjusted?
+  ${notification}"
+type: metric alert
+thresholds: {critical: 25, warning: 40}
+timeout_h: 0

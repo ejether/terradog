@@ -1,0 +1,28 @@
+notify_audit: false
+locked: false
+name: '[${environment}] ELB Healthy Hosts'
+tags: ['${environment}']
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: false
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+query: max(last_15m):max:aws.elb.healthy_host_count{loadbalancername:${elb_name}} <= ${elb_healthy_hosts_critical_threshold}
+message: |
+  {{#is_alert}}
+  ELB has {{value}} healthy hosts.
+  {{/is_alert}} 
+  {{#is_recovery}}
+  ELB now has a healthy host count.
+  {{/is_recovery}} 
+  ${notifications}
+type: query alert
+thresholds:
+  critical: ${elb_healthy_hosts_critical_threshold}
+timeout_h: 0
+definition_defaults:
+  elb_name: ""
+  elb_healthy_hosts_critical_threshold: 0

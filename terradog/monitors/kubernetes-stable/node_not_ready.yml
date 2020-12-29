@@ -1,0 +1,43 @@
+notify_audit: false
+locked: false
+name: "[${environment}] Node is not Ready"
+tags: ['${environment}']
+include_tags: false
+no_data_timeframe: 2
+silenced: {}
+new_host_delay: 900
+notify_no_data: false
+renotify_interval: 0
+query: "\"kubernetes_state.node.ready\".over(\"${cluster_tag}:${cluster}\").by(\"node\").last(20).count_by_status()"
+message: |
+  {{#is_warning}}
+  A Node is not ready!
+  Cluster: {{${cluster_tag}.name}}
+  Host: {{host.name}}
+  IP: {{host.ip}}
+  {{check_message}}
+  {{/is_warning}}
+  {{#is_alert}}
+  A Node is not ready!
+  Cluster: {{${cluster_tag}.name}}
+  Host: {{host.name}}
+  IP: {{host.ip}}
+  {{check_message}}
+  {{/is_alert}}
+  {{#is_recovery}}
+  Node is now ready.
+  Cluster: {{${cluster_tag}.name}}
+  Host: {{host.name}}
+  IP: {{host.ip}}
+  {{/is_recovery}}
+  ${notifications}
+type: service check
+thresholds:
+  critical: ${node_not_ready_critical_threshold}
+  warning: ${node_not_ready_warning_threshold}
+  ok: ${node_not_ready_ok_threshold}
+definition_defaults:
+  node_not_ready_critical_threshold: 20
+  node_not_ready_warning_threshold: 9
+  node_not_ready_ok_threshold: 2
+  cluster_tag: kubernetescluster

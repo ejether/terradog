@@ -1,0 +1,87 @@
+read_only: false
+description: 'Kubernetes Resource Timeboard'
+title: 'Kubernetes Resource Timeboard'
+graphs:
+- definition:
+    style: {fillMax: null, palette: YlOrRd, fillMin: null, paletteFlip: false}
+    group: null
+    notes: null
+    noMetricHosts: false
+    viz: hostmap
+    scope: [$node, $kube_deployment]
+    requests:
+    - {q: 'sum:kubernetes.cpu.usage.total{$node,$kube_deployment} by {host}', type: fill}
+    noGroupHosts: true
+  title: Node CPU Usage
+- definition:
+    viz: toplist
+    status: done
+    requests:
+    - q: top(sum:kubernetes.cpu.usage.total{$scope,$node,$kube_namespace,$kube_deployment}
+        by {pod_name}, 10, 'mean', 'desc')
+      style: {width: normal, palette: warm, type: solid}
+      type: null
+      conditional_formats: []
+  title: Top CPU Pods
+- definition:
+    viz: timeseries
+    status: done
+    requests:
+    - q: top(avg:docker.cpu.usage{$scope} by {pod_name}, 10, 'mean', 'desc')/avg:kubernetes.cpu.limits{$scope}
+        by {pod_name}
+      aggregator: avg
+      style: {width: normal, palette: dog_classic, type: solid}
+      type: line
+      conditional_formats: []
+    autoscale: true
+  title: Top Pod CPU Utilitization
+- definition:
+    style: {fillMax: null, palette: hostmap_blues, fillMin: null, paletteFlip: false}
+    group: null
+    notes: null
+    noMetricHosts: false
+    viz: hostmap
+    scope: [$node, $kube_deployment]
+    requests:
+    - {q: 'sum:kubernetes.memory.usage{$node,$kube_deployment} by {host}', type: fill}
+    noGroupHosts: true
+  title: Node Mem Usage
+- definition:
+    viz: toplist
+    status: done
+    requests:
+    - q: top(sum:kubernetes.memory.usage{$scope,$node,$kube_namespace,$kube_deployment}
+        by {pod_name}, 10, 'mean', 'desc')
+      style: {width: normal, palette: cool, type: solid}
+      type: null
+      conditional_formats: []
+  title: Sum of kubernetes.memory.usage over $scope,$node,$kube_namespace,$kube_deploy...
+- definition:
+    viz: timeseries
+    status: done
+    requests:
+    - q: top(avg:kubernetes.memory.usage{$scope,$node,$kube_namespace,$kube_deployment}
+         by {pod_name}, 10, 'mean', 'desc')/avg:kubernetes.memory.limits{$scope,$node,$kube_namespace,$kube_deployment}
+         by {pod_name}*100
+      aggregator: avg
+      style: {width: normal, palette: dog_classic, type: solid}
+      type: line
+      conditional_formats: []
+    autoscale: true
+  title: Avg of kubernetes.memory.usage over $scope by pod_name
+
+template_variables:
+- default: '*'
+  prefix: ${cluster_tag}
+  name: scope
+- default: '*'
+  prefix: kube_namespace
+  name: kube_namespace
+- default: '*'
+  prefix: kube_deployment
+  name: kube_deployment
+- default: '*'
+  prefix: node
+  name: node
+definition_defaults:
+  cluster_tag: kubernetescluster

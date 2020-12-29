@@ -1,0 +1,23 @@
+notify_audit: false
+locked: false
+name: '[${environment}] Job failures in ${namespace}'
+tags: ['${environment}']
+include_tags: true
+no_data_timeframe: 120
+silenced: {}
+new_host_delay: 300
+require_full_window: false
+notify_no_data: false
+renotify_interval: 0
+vary_by_namespace: true
+type: metric alert
+query: "sum(last_5m):max:kubernetes_state.job.failed{${cluster_tag}:${cluster},namespace:${namespace}} by {job_name}.as_count().fill(zero) + 100 - 100 >= 1"
+message: |
+  {{#is_alert}}
+  A kubernetes job has failed. Is a job misconfigured, or are the proper resources available?
+  {{/is_alert}}
+  ${notifications}
+definition_defaults:
+  namespaces:
+  - kube-system
+  cluster_tag: kubernetescluster

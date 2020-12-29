@@ -1,0 +1,31 @@
+notify_audit: false
+locked: false
+name: '[${environment}] Certificate is Not Ready'
+tags: ['${environment}', cert-manager]
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: true
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+vary_by_namespace: false
+query: min(last_1h):max:cert_manager.certmanager_certificate_ready_status{${cluster_tag}:${cluster},condition:false} by {name} > ${cert_ready_critical_threshold}
+message: |
+  {{#is_alert}}
+  Certificate {{name.name}} is not ready
+  {{/is_alert}}
+  {{#is_recovery}}
+  Certificate {{name.name}} is now ready
+  {{/is_recovery}}
+  ${low_urgency_notifications}
+type: metric alert
+thresholds:
+  critical: ${cert_ready_critical_threshold}
+timeout_h: 0
+definition_defaults:
+  cert_ready_critical_threshold: 0
+  namespaces:
+  - kube-system
+  cluster_tag: kubernetescluster

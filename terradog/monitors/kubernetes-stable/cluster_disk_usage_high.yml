@@ -1,0 +1,40 @@
+notify_audit: false
+locked: false
+name: '[${environment}] Host Disk Usage High'
+tags: ['${environment}', hardware]
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: true
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+query: avg(last_30m):( avg:system.disk.total{${cluster_tag}:${cluster}} by {host} - avg:system.disk.free{${cluster_tag}:${cluster}} by {host} ) / avg:system.disk.total{${cluster_tag}:${cluster}} by {host} * 100 > ${cluster_disk_usage_high_critical_threshold}
+message: |
+    {{#is_alert}}
+    Disk Usage has been above threshold over 30 minutes on {{host.name}}
+    {{/is_alert}}
+    {{#is_warning}}
+    Disk Usage has been above threshold over 30 minutes on {{host.name}}
+    {{/is_warning}}
+    {{^is_alert}}
+    Disk Usage has recovered on {{host.name}}
+    {{/is_alert}}
+    {{^is_warning}}
+    Disk Usage has recovered on {{host.name}}
+    {{/is_warning}}
+    ${notifications}
+type: query alert
+thresholds: 
+  critical: ${cluster_disk_usage_high_critical_threshold}
+  warning: ${cluster_disk_usage_high_warning_threshold}
+  warning_recovery: ${cluster_disk_usage_high_warning_recovery_threshold}
+  critical_recovery: ${cluster_disk_usage_high_critical_recovery_threshold}
+timeout_h: 0
+definition_defaults:
+  cluster_disk_usage_high_critical_threshold: 95
+  cluster_disk_usage_high_warning_threshold: 92
+  cluster_disk_usage_high_critical_recovery_threshold: 94
+  cluster_disk_usage_high_warning_recovery_threshold: 91
+  cluster_tag: kubernetescluster

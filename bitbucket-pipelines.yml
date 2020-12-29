@@ -1,0 +1,29 @@
+image:
+  name: python:3-slim
+
+definitions:
+  steps:
+    - step: &install-test
+        name: Install and Test
+        script:
+          - pip install -r requirements.txt
+          - pip install ./terradog
+          - pycodestyle
+          - pytest
+    - step: &docker-build
+        name: Build Docker image
+        script:
+          - docker build . -t terradog:${BITBUCKET_COMMIT}
+        services:
+          - docker
+
+pipelines:
+  pull-requests:
+    "**":
+      - step: *install-test
+      - step: *docker-build
+
+  branches:
+    master:
+      - step: *install-test
+      - step: *docker-build

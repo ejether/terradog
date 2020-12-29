@@ -1,0 +1,30 @@
+notify_audit: false
+locked: false
+name: '[${environment}] Failed Pods'
+tags: ['${environment}']
+include_tags: false
+silenced: {}
+new_host_delay: 300
+require_full_window: true
+notify_no_data: false
+no_data_timeframe: 0
+renotify_interval: 0
+escalation_message: ''
+query: min(last_30m):max:kubernetes_state.pod.status_phase{${cluster_tag}:${cluster},phase:failed}.fill(zero) > ${pods_failed_critical_threshold}
+message: |
+  {{#is_alert}}
+  There have been {{value}} failed pods for 30 minutes.
+    - Are new pods being admitted?
+    - Is the api-server having problems?
+  {{/is_alert}}
+  {{^is_alert}}
+  Pods are no longer failed.
+  {{/is_alert}}
+  ${notifications}
+type: metric alert
+thresholds:
+  critical: ${pods_failed_critical_threshold}
+timeout_h: 0
+definition_defaults:
+  pods_failed_critical_threshold: 50
+  cluster_tag: kubernetescluster

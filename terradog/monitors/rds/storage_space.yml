@@ -1,0 +1,17 @@
+notify_audit: false
+locked: false
+name: '[${environment}] RDS Storage space'
+tags: ['${environment}']
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+require_full_window: true
+new_host_delay: 300
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+query: avg(last_1h):avg:aws.rds.free_storage_space{env:${environment}} by {name} * 100 / avg:aws.rds.total_storage_space{env:${environment}} by {name} < 10
+message: ${notifications}
+type: query alert
+thresholds: {critical: 10, warning: 20}
+timeout_h: 0

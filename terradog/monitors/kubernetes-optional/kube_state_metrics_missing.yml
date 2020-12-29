@@ -1,0 +1,36 @@
+notify_audit: false
+locked: false
+name: "[${environment}] Kube-state-metrics Missing Data"
+tags: ['${environment}']
+include_tags: false
+no_data_timeframe: 20
+silenced: {}
+new_host_delay: 600
+notify_no_data: true
+renotify_interval: 360
+#  query grabs the not_null count of metrics reported from kube-state-metrics, and if any gaps exist, fill with zero.
+query: >
+  min(last_5m):default_zero(count_not_null(min:kubernetes_state.node.status{${cluster_tag}:${cluster}})) < 1
+message: |
+  Kubernetes Cluster: ${cluster}
+  {{#is_alert}}
+  Kubernetes cluster has not reported any kube-state-metrics. Collecting the data from kube-state-metrics has failed and should be investigated.
+
+  Hints:
+    - Check that the datadog agent is not OOM or crashlooping on one node that is housed next to kube-state-metrics
+    - Make sure kube-state-metrics pods are running and do not have any errors
+    - Assure that kube-state-metrics is running
+
+    If you're receiving this alert then kube-state-metrics has failed to report any data. Note that this alert is based on the "short image name" of "kube-state-metrics" so this also may be caused by a change upstream to the way it's running in the cluster.
+  {{/is_alert}}
+
+  {{#is_recovery}}
+  Kubernetes cluster has recovered kube-state-metrics. They are being collected successfully.
+  {{/is_recovery}}
+
+  ${notifications}
+type: metric alert
+thresholds:
+  critical: 1
+definition_defaults:
+  cluster_tag: kubernetescluster

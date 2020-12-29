@@ -1,0 +1,32 @@
+notify_audit: false
+locked: false
+name: '[${environment}] external-dns reporting errors with sources (kubernetes).'
+tags: [network, '${environment}']
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: false
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+query: sum(last_15m):max:external_dns.source_errors_total{${cluster_tag}:${cluster}}.as_count() > 10
+message: |
+  {{#is_warning}}
+  The external-dns controller is reporting source errors.
+  Most likely a kubernetes object was deployed with a misconfiguration regarding external-dns.
+
+  Check the logs of external-dns for more information.
+  ${low_urgency_notifications}
+  {{/is_warning}}
+  {{#is_recovery}}
+  ${low_urgency_notifications}
+  {{/is_recovery}}
+type: metric alert
+thresholds:
+  critical: 10
+  warning: ${external_dns_source_errors_warning_threshold}
+timeout_h: 0
+definition_defaults:
+  external_dns_source_errors_warning_threshold: 1
+  cluster_tag: kubernetescluster

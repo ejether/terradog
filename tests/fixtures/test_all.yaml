@@ -1,0 +1,64 @@
+---
+definitions:
+  cluster: test_cluster_name
+  namespaces:
+  - namespace_name
+  - kube-system
+  - fake-namespace
+  environment: test
+  cluster_tag: cluster_tag
+  notifications: '@slack'
+  low_urgency_notifications: '@slack'
+dashboards:
+- source: kubernetes.resources
+monitors:
+- source: kubernetes-stable
+- source: kubernetes-stable.ntp
+- source: kubernetes-stable.pod_crashes
+  definitions:
+    namespaces: [alb-ingress]
+    pod_crashes_critical_threshold: 3
+- source: kubernetes-stable.pod_crashes
+  definitions:
+    namespaces: [kube-system, rbac-manager, metrics-server, infra, external-dns, cluster-autoscaler]
+- source: kubernetes-stable.pods_pending
+- source: kubernetes-optional.cluster_network_errors
+  definitions:
+    cluster_network_errors_critical_threshold: 10
+    cluster_network_errors_warning_threshold: 5
+- source: kubernetes-optional.deployment_readiness
+  definitions:
+    namespaces: [one, two, three]
+- source: kubernetes-optional.daemonset_readiness
+- source: kubernetes-optional.daemonset_readiness
+  id: extradaemonsetns
+  definitions:
+    namespaces: [one]
+- notify_audit: false
+  locked: false
+  name: test var replacement for inline monitors
+  tags: [network, '${environment}']
+  include_tags: false
+  no_data_timeframe:
+  silenced: {}
+  new_host_delay: 300
+  require_full_window: true
+  notify_no_data: false
+  renotify_interval: 0
+  escalation_message: ''
+  query: ${cluster} ${namespace} ${environment}
+  message: |
+    ${notifications}
+  type: metric alert
+  thresholds: {critical: 10, warning: 5}
+  timeout_h: 0
+  definitions:
+    notifications: in-line-notifications
+    namespace: foo
+downtimes:
+- name: Test Maintenance Window
+  scope: '*'
+  start: 1614285704
+  end: 1645821704
+  recurrence_type: days
+  recurrence_period: 1

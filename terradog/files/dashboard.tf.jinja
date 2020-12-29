@@ -1,0 +1,81 @@
+
+resource "datadog_timeboard" "{{ resource_name }}" {
+  title       = "{{ title }}"
+  description = "{{ description }}"
+  read_only   = {{ read_only | lower }}
+
+  {% for graph in graphs %}
+  graph {
+    title = "{{ graph.title }}"
+    viz   = "{{ graph.definition.viz }}"
+
+    {%- for request in graph.definition.requests %}
+    request {
+      q    = "{{ request.q }}"
+      type = "{{ request.type }}"
+      
+      {%- if request.aggregator %}
+      aggregator = "{{ request.aggregator }}"
+      {%- endif %}
+      {%- if request.style %}
+      style = {
+      {%- for key,value in request.style.items() %}
+        {{ key }} = "{{ value }}"
+      {%- endfor %}
+      }
+      {%- endif %}
+      {%- if request.conditional_formats %}
+      aggregator = "{{ request.conditional_formats }}"
+      {%- endif %}
+      {%- if request.stacked %}
+      aggregator = "{{ request.stacked }}"
+      {%- endif %}
+    }
+    {%- endfor %}
+
+    {%- if graph.events %}
+    events = "{{ graph.events }}"
+    {%- endif %}
+    {%- if graph.autoscale %}
+    autoscale = "{{ graph.autoscale }}"
+    {%- endif %}
+    {%- if graph.precision %}
+    precision = "{{ graph.precision }}"
+    {%- endif %}
+    {%- if graph.custom_unit %}
+    custom_unit = "{{ graph.custom_unit }}"
+    {%- endif %}
+    {%- if graph.style %}
+    style =  "{{ graph.style }}"
+    {%- endif %}
+    {%- if graph.group %}
+    group = "{{ graph.group }}"
+    {%- endif %}
+    {%- if graph.include_no_metric_hosts %}
+    include_no_metric_hosts = {{ graph.include_no_metric_hosts | lower }}
+    {%- endif %}
+    {%- if graph.include_ungrouped_hosts %}
+    include_ungrouped_hosts = {{ graph.include_ungrouped_hosts | lower }}
+    {%- endif %}
+    {%- if graph.scope %}
+    scope = "{{ graph.scope }}"
+    {%- endif %}
+    {%- if graph.yaxis %}
+    yaxis = "{{ graph.yaxis }}"
+    {%- endif %}
+    {%- if graph.marker %}
+    marker = "{{ graph.marker }}"
+    {%- endif %}
+  }
+  {% endfor %}
+
+  {%- for tv in template_variables %}
+  template_variable {
+    {%- if tv.default %}
+    default = "{{ tv.default }}"
+    {%- endif %}
+    name = "{{ tv.name }}"
+    prefix = "{{ tv.prefix }}"
+  }
+  {% endfor %}
+}

@@ -1,0 +1,36 @@
+notify_audit: false
+locked: false
+name: '[${environment}] Cluster Autoscaler Errors'
+tags: ['${environment}']
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: false
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+query: sum(last_10m):max:clusterautoscaler.cluster_autoscaler_errors_total{${cluster_tag}:${cluster}}.as_count() > ${cluster_autoscaler_errors_critical_threshold}
+message: |
+  {{#is_alert}}
+  Cluster-autoscaler has registered {{value}} errors.
+
+  This metric increases every time the main cluster-autoscaler loop encounters an error.
+  A growing count signifies an internal error in cluster-autoscaler or a problem with underlying infrastructure preventing normal operation. Example errors include:
+  - failed to get list of nodes or pods from API server,
+  - failed to retrieve node group size from cloud provider,
+  - failed to update node group size,
+  - error in CA simulations
+  - error updating internal data structures.
+  {{/is_alert}}
+  {{#is_recovery}}
+  There are no longer any registered cluster-autoscaler errors.
+  {{/is_recovery}} 
+  ${notifications}
+type: metric alert
+thresholds:
+  critical: ${cluster_autoscaler_errors_critical_threshold}
+timeout_h: 0
+definition_defaults:
+  cluster_autoscaler_errors_critical_threshold: 0
+  cluster_tag: kubernetescluster

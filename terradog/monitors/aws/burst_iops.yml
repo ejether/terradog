@@ -1,0 +1,25 @@
+notify_audit: false
+locked: false
+name: '[${environment}] burning through burstable iops capacity on host'
+tags: ['${environment}']
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: false
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+query: avg(last_1h):min:aws.ebs.burst_balance{${cluster_tag}:${cluster}} by {host} <= 1
+message: |
+  When burst capacity reaches 0, iops will be throttled. This can result in
+    - timeouts during image pulls
+    - pod startup failure due to longer startups failing livenessprobe expectations
+  Are there lots of pods with large images on this node?
+  Are one or more pods using more iops than expected?
+  ${notifications}
+type: query alert
+thresholds: {critical: 1, warning: 20, critical_recovery: 10}
+timeout_h: 0
+definition_defaults:
+  cluster_tag: kubernetescluster

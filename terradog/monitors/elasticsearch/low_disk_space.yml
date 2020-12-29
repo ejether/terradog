@@ -1,0 +1,20 @@
+notify_audit: false
+locked: false
+name: '[${environment}]Elasticsearch cluster low on disk space'
+tags: []
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: true
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+query: avg(last_1h):min:aws.es.free_storage_space.minimum{domainname:${elasticsearchdomain}} < 4096
+message: |
+  {{#is_alert}}
+  ${notifications}
+  {{/is_alert}}
+type: metric alert
+thresholds: {critical: 4096, warning: 8192}
+timeout_h: 0

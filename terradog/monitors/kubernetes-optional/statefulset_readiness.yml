@@ -1,0 +1,32 @@
+notify_audit: false
+locked: false
+name: '[${environment}] Statefulset readiness in ${namespace}'
+tags: ['${environment}']
+include_tags: true
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: false
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+vary_by_namespace: true
+query: min(last_30m):2 * max:kubernetes_state.statefulset.replicas_desired{${cluster_tag}:${cluster},namespace:${namespace}} by {statefulset} - max:kubernetes_state.statefulset.replicas_current{${cluster_tag}:${cluster},namespace:${namespace}} by {statefulset} - max:kubernetes_state.statefulset.replicas_updated{${cluster_tag}:${cluster},namespace:${namespace}} by {statefulset} > ${statefulset_readiness_critical_threshold}
+message: |
+  {{#is_alert}}
+  Statefulset pods are either out of date or not ready for {{statefulset.name}}
+  Check that `kubectl get ds` shows the same number for Desired/Current/Ready/Up-to-date/Available.
+  {{/is_alert}}
+  {{^is_alert}}
+  Statefulset pods are Up-to-Date and Ready for {{statefulset.name}}
+  {{/is_alert}}
+  ${notifications}
+type: query alert
+thresholds:
+  critical: ${statefulset_readiness_critical_threshold}
+timeout_h: 0
+definition_defaults:
+  statefulset_readiness_critical_threshold: 0
+  namespaces:
+  - kube-system
+  cluster_tag: kubernetescluster

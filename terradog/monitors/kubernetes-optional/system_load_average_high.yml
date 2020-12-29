@@ -1,0 +1,27 @@
+notify_audit: false
+locked: false
+name: '[${environment}] High System Load Avg on ${cluster}'
+tags: ['${environment}']
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+require_full_window: true
+new_host_delay: 300
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+query: avg(last_30m):avg:system.load.norm.5{${cluster_tag}:${cluster}${system_load_average_additional_filters}} by {host} > ${system_load_average_critical_threshold}
+message: |
+  Load average is high on {{host.name}} {{host.ip}}.
+  This is a normalized load based on the number of CPUs (i.e. ActualLoadAverage / NumberOfCPUs)
+  Is this node over-provisioned? Pods may need to have a CPU limits closer to their requests
+  Is this node doing a lot of I/O? Load average could be high based on high disk or networking I/O. This may be acceptable if application performance is still ok. To reduce I/O-based system load, you may need to artificially limit the number of high-I/O pods running on a single node.
+  ${notifications}
+type: metric alert
+thresholds:
+  critical: ${system_load_average_critical_threshold}
+timeout_h: 0
+definition_defaults:
+  system_load_average_critical_threshold: 2
+  system_load_average_additional_filters: ""
+  cluster_tag: kubernetescluster

@@ -1,0 +1,74 @@
+read_only: false
+description: 'Resource Utilization Dashboard'
+title: 'Resource Utilization Dashboard'
+graphs:
+- definition:
+    autoscale: false
+    noMetricHosts: false
+    custom_unit: '%'
+    viz: timeseries
+    requests:
+    - q: top(avg:docker.cpu.usage{$scope,$kube_namespace,$kube_deployment,$node} by {pod_name},
+        10, 'mean', 'asc')/avg:kubernetes.cpu.limits{$scope,$kube_namespace,$kube_deployment,$node}
+        by {pod_name}*100
+      type: line
+      style:
+        palette: dog_classic
+        type: solid
+        width: normal
+      aggregator: avg
+    noGroupHosts: false
+  title: Bottom 10 CPU Utilization
+- definition:
+    autoscale: false
+    noMetricHosts: false
+    custom_unit: '%'
+    viz: timeseries
+    requests:
+    - q: top(avg:kubernetes.memory.usage{$scope,$kube_namespace,$kube_deployment,$node}
+         by {pod_name}, 10, 'mean', 'asc')/avg:kubernetes.memory.limits{$scope,$kube_namespace,$kube_deployment,$node}
+         by {pod_name}*100
+      type: line
+      style:
+        palette: dog_classic
+        type: solid
+        width: normal
+      aggregator: avg
+    noGroupHosts: false
+  title: Bottom 10 Memory Utilization
+- definition:
+    style:
+      fillMax: 100
+      palette: green_to_orange
+      fillMin: 0
+      paletteFlip: false
+    group:
+    - kubernetescluster
+    notes: null
+    noMetricHosts: true
+    scope:
+    - $scope
+    - kubernetes
+    viz: hostmap
+    nodeType: host
+    requests:
+    - q: avg:aws.ec2.cpuutilization{$scope,kubernetes} by {host}
+      type: fill
+    noGroupHosts: true
+    status: done
+  title: 'Resource Utilization Dashboard'
+template_variables:
+- default: '*'
+  prefix: ${cluster_tag}
+  name: scope
+- default: '*'
+  prefix: kube_namespace
+  name: kube_namespace
+- default: '*'
+  prefix: kube_deployment
+  name: kube_deployment
+- default: '*'
+  prefix: node
+  name: node
+definition_defaults:
+  cluster_tag: kubernetescluster

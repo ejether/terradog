@@ -1,0 +1,31 @@
+notify_audit: false
+locked: false
+name: '[${environment}] Scaling Failure'
+tags: ['${environment}']
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 300
+require_full_window: false
+notify_no_data: false
+renotify_interval: 0
+escalation_message: ''
+query: sum(last_10m):max:clusterautoscaler.cluster_autoscaler_failed_scale_ups_total{${cluster_tag}:${cluster}}.as_count() > ${failed_scale_up_critical_threshold}
+message: |
+  {{#is_alert}}
+  There have been {{value}} failed scale up events!
+  This monitor counts the number of unsuccessful scale-up operations performed by cluster-autoscaler.
+  This includes both getting error from cloud provider and new nodes failing to boot up and register
+  within timeout. It does not include reaching maximum cluster size.
+  {{/is_alert}}
+  {{#is_recovery}}
+  There are no longer any failed scale-up events.
+  {{/is_recovery}}
+  ${notifications}
+type: metric alert
+thresholds:
+  critical: ${failed_scale_up_critical_threshold}
+timeout_h: 0
+definition_defaults:
+  failed_scale_up_critical_threshold: 0
+  cluster_tag: kubernetescluster

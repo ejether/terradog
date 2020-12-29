@@ -1,0 +1,24 @@
+notify_audit: false
+locked: false
+name: '[${environment}] Kubelet unhealthy'
+thresholds:
+  critical: ${kubelet_unhealthy_critical_threshold}
+tags: ['${environment}']
+new_host_delay: 300
+notify_no_data: false
+renotify_interval: 0
+query: '"kubernetes.kubelet.check".over("${cluster_tag}:${cluster}").by("host").last(${kubelet_unhealthy_critical_threshold}).count_by_status()'
+message: |
+  {{#is_alert}}
+  Kubelet is in an unhealthy state.  Either the Kubelet's api is unavailable or Kubelet's sync loop that updates containers isn't working.
+  {{/is_alert}}
+  {{^is_alert}}
+  Kubelets are healthy again
+  {{/is_alert}}
+  ${notifications}
+type: service check
+no_data_timeframe: 2
+timeout_h: 0
+definition_defaults:
+  cluster_tag: kubernetescluster
+  kubelet_unhealthy_critical_threshold: 40

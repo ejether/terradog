@@ -1,0 +1,33 @@
+notify_audit: false
+locked: false
+name: '[${environment}] AWS Resource Utilization Monitor'
+tags: ['${environment}']
+include_tags: false
+no_data_timeframe: null
+silenced: {}
+new_host_delay: 600
+require_full_window: true
+notify_no_data: false
+renotify_interval: 0
+evaluation_delay: 900
+escalation_message: ''
+query: avg(last_1h):max:aws.advisor.service_limit.usage_ratio{aws_account:${aws_account_number}} by {limit_name,service_name,region} * 100 > 90
+message: |
+    {{#is_alert}}
+    {{ limit_name}}% is {{ value}}% of service limit. Does the limit need to be increased, or are there old resources that need to be cleaned up?
+    {{/is_alert}}
+    {{#is_warning}}
+    {{ limit_name}}% is {{ value}}% of service limit.  Does the limit need to be increased, or are there old resources that need to be cleaned up?
+    {{/is_warning}}
+    {{#is_alert_recovery}}
+    {{ limit_name}}% usage has recovered. Current value is {{value}}%.
+    {{/is_alert_recovery}}
+    {{#is_warning_recovery}}
+    {{ limit_name}}% usage usage has recovered. Current value is {{value}}%.
+    {{/is_warning_recovery}}
+    ${low_urgency_notifications}
+type: metric alert
+thresholds:
+  critical: 90
+  warning: 75
+timeout_h: 0
