@@ -6,7 +6,7 @@ definitions:
     - step: &install-test
         name: Install and Test
         script:
-          - apt-get update && apt-get install git
+          - apt-get update && apt-get install git -y
           - pip install -r requirements.txt
           - pip install .
           - terradog --version
