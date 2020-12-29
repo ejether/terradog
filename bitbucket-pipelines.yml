@@ -7,7 +7,8 @@ definitions:
         name: Install and Test
         script:
           - pip install -r requirements.txt
-          - pip install ./terradog
+          - pip install .
+          - terradog --version
           - pycodestyle
           - pytest
     - step: &docker-build
