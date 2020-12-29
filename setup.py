@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 import sys
 
@@ -12,13 +11,10 @@ except ImportError:
     sys.exit(1)
 
 
-
-
 class meta(object):
     __version__ = "0.1.0"
     __author__ = 'Peak6 Technologies'
     __author_email__ = 'devops@peak6.com',
-
 
 
 setup(name='terradog',

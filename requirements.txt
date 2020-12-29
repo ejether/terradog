@@ -1,11 +1,5 @@
 pylint==2.6.0
 autopep8==1.5.4
 pycodestyle==2.6.0
-
-#codecov==2.0.15
-#pytest==4.6.5
-#pytest-cov==2.7.1
-
-
+pytest==4.6.5
 #pdoc==0.3.2
-
