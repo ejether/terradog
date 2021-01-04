@@ -1,7 +1,7 @@
 
-resource "datadog_monitor" "test_deployment_readiness_in_fake_namespace" {
+resource "datadog_monitor" "test_deployment_readiness_in_two" {
   # Required Arguments
-  name = "[test] Deployment readiness in fake-namespace"
+  name = "[test] Deployment readiness in two"
   type = "query alert"
 
   message = <<EOF
@@ -14,7 +14,7 @@ Unavailable replicas is back to 0 for {{deployment.name}}
 @slack
 
   EOF
-  query   = "min(last_30m):max:kubernetes_state.deployment.replicas_unavailable{cluster_tag:test_cluster_name,namespace:fake-namespace} by {deployment} > 0"
+  query   = "min(last_30m):max:kubernetes_state.deployment.replicas_unavailable{cluster_tag:test_cluster_name,namespace:two} by {deployment} > 0"
 
   # Optional Arguments
   new_host_delay = 300

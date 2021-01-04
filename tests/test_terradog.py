@@ -1,10 +1,13 @@
 
 import os
+import re
 import glob
 import unittest
 import logging
 
+
 from terradog import TerraDog
+from terradog.resource import Resource
 
 from terradog.helpers import parse_yaml_file, hash_directory
 
@@ -43,137 +46,58 @@ class TerraDogGoldenFilesTest(unittest.TestCase):
         self.assertEqual(self.start_hash, self.end_hash)
 
 
-# class DDGoldenTestCase(unittest.TestCase):
-
-#     def setUp(self):
-#         Config(
-#             inventory='default',
-#             interactive=False,
-#             confirm=False,
-#             overwrite=False,
-#             home='tests/files/'
-#         )
-
-#         self.repo_dir=os.path.join(GOLDEN_HOME, "datadog/", self.name)
-#         Config().infrastructure_repo=self.repo_dir
-
-#         if not os.path.exists(self.repo_dir):
-#             os.makedirs(self.repo_dir)
-#         self.start_hash=HashDirectory(self.repo_dir)
-
-#         shutil.rmtree(self.repo_dir)
-#         shutil.copytree(os.path.join(GOLDEN_HOME, "initial/", self.start_inventory), self.repo_dir)
-
-#         self.dd=Datadog(data={})
-
-#     def tearDown(self):
-#         self.end_hash=HashDirectory(self.repo_dir)
-#         self.assertEqual(self.start_hash, self.end_hash)
+class TerraDogResourceGroupTest(unittest.TestCase):
+    pass
 
 
-# class TestDatadog(DDTestCase):
+class TerraDogResourceTest(unittest.TestCase):
 
-#     def test_datadog_defaults(self):
+    def setUp(self):
+        self.test_data = parse_yaml_file('./tests/fixtures/test_resource.yaml')
+        self.input_definitions = {
+            'environment': 'test_environment',
+            'cluster': 'test_cluster',
+            'namespace': 'test_namespace',
+            'notifications': '@test_notifications'
+        }
 
-#         dd=Datadog()
+    def test_inline_missing_definition_raises(self):
+        definitions = {}
+        with self.assertRaises(KeyError):
+            Resource(self.test_data, 'monitor', '/tmp/', definitions)
 
-#         self.assertEqual(dd._defaults, {'backend': 'datadog/tf.state'})
-#         self.assertTrue(dd.inventory_required)
-#         self.assertIsInstance(dd.inventory, (Inventory))
-#         self.assertEqual(dd.display_name, "Datadog")
-#         self.assertTrue(dd.update_implemented)
+    def test_inline_definitions(self):
+        inline_definitions = {
+            'cluster': 'inline_cluster',
+            'namespace': 'inline_namespace'
+        }
 
+        combined_definitions = {
+            'environment': 'test_environment',
+            'cluster': 'inline_cluster',
+            'namespace': 'inline_namespace',
+            'notifications': '@test_notifications'
+        }
 
-# class TestDatadogAdd(DDGoldenTestCase):
-#     name="add"
+        test_resource = Resource(self.test_data, 'monitor', '/tmp/', self.input_definitions)
+        self.assertEqual(test_resource.data['definitions'], inline_definitions)
+        self.assertEqual(test_resource.global_definitions, self.input_definitions)
+        self.assertEqual(test_resource.definitions, combined_definitions)
 
-#     def test_datadog_add(self):
-#         self.dd._data['datadog_cluster_agent_token']='fake_token'
-#         self.dd.add()
+        self.assertEqual(test_resource.data['query'], "inline_cluster inline_namespace test_environment")
 
+    def test_attributes_and_properties(self):
+        test_resource = Resource(self.test_data, 'monitor', '/tmp/', self.input_definitions)
+        self.assertEqual(test_resource.global_definitions, self.input_definitions)
+        self.assertEqual(test_resource.template_file_name, 'monitor.tf.jinja')
+        self.assertEqual(test_resource.target_file_name, '/tmp/test_var_replacement_for_inline_monitors.tf')
+        self.assertEqual(test_resource.data, self.test_data)
 
-# class TestDatadogAddAzure(DDGoldenTestCase):
-#     name="add-azure"
+    def test_title_for_file_name(self):
+        self.test_data['title'] = "New Test Title"
+        test_resource = Resource(self.test_data, 'monitors', '/tmp/', self.input_definitions)
+        self.assertEqual(test_resource.target_file_name, '/tmp/test_var_replacement_for_inline_monitors.tf')
 
-#     def test_datadog_add(self):
-#         self.dd._data['cloud']='azure'
-#         self.dd._data['datadog_sp_password']='fake_password'
-#         self.dd._data['datadog_cluster_agent_token']='fake_token'
-#         self.dd.add()
-
-
-# class TestDashboards(DDGoldenTestCase):
-#     name="dashboards"
-
-#     def test_dashboard_add(self):
-#         self.dd._data['datadog_cluster_agent_token']='fake_token'
-#         self.dd.add()
-#         data={
-#             'definitions': {'cluster_tag': 'cluster_tag'},
-#             'dashboards': [{'source': 'kubernetes.resources'}],
-#         }
-#         ds=Dashboards(data)
-#         ds.add()
-
-
-# class TestMonitorDefinitionsGlobal(DDGoldenTestCase):
-#     name="monitors-global"
-
-#     def test_pods_monitor_output(self):
-#         self.dd._data['datadog_cluster_agent_token']='fake_token'
-#         self.dd.add()
-#         data={
-#             'definitions': {
-#                 'cluster': 'cluster_name',
-#                 'pods_pending_critical_threshold': 1234,
-#                 'namespace': 'namespace_name',
-#                 'environment': 'test',
-#                 'cluster_tag': 'cluster_tag',
-#                 'notifications': '@slack',
-#                 'low_urgency_notifications': '@slack',
-#             },
-#             'dashboards': [{'source': 'kubernetes.resources'}],
-#             'monitors': [{'source': 'kubernetes.pods_pending'}],
-#         }
-#         ms=Monitors(data)
-#         ms.add()
-
-
-# class TestMonitors(DDGoldenTestCase):
-#     name="pod-monitors"
-
-#     def test_pods_monitor_output(self):
-#         self.dd._data['datadog_cluster_agent_token']='fake_token'
-#         self.dd.add()
-#         with open(TEST_FILE_PATH + "rodd_test_input.yaml") as f:
-#             data=yaml.load(f.read(), Loader=yaml.loader.FullLoader)
-#         ms=Monitors(data)
-#         ms.add()
-
-
-# class TestDowntimes(DDGoldenTestCase):
-#     name="downtimes"
-
-#     def test_downtime_output(self):
-#         self.dd._data['datadog_cluster_agent_token']='fake_token'
-#         self.dd.add()
-#         data={
-#             'definitions': {
-#                 'cluster': 'cluster_name',
-#                 'namespace': 'namespace_name',
-#                 'environment': 'test',
-#                 'cluster_tag': 'cluster_tag',
-#                 'notifications': '@slack',
-#                 'low_urgency_notifications': '@slack',
-#             },
-#             'downtimes': [{
-#                 'name': 'Test Maintenance Window',
-#                 'scope': '*',
-#                 'start': 1614285704,
-#                 'end': 1645821704,
-#                 'recurrence_type': 'days',
-#                 'recurrence_period': 1,
-#             }],
-#         }
-#         ms=Downtimes(data)
-#         ms.add()
+    def test_pural_to_singular_for_resource_type(self):
+        test_resource = Resource(self.test_data, 'monitors', '/tmp/', self.input_definitions)
+        self.assertEqual(test_resource.template_file_name, 'monitor.tf.jinja')

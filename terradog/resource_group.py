@@ -12,11 +12,11 @@ logger = logging.getLogger(__name__)
 
 class ResourceGroup(object):
 
-    def __init__(self, data: list, resource_type: str, destination: str, definitions: dict) -> None:
+    def __init__(self, data: list, resource_type: str, destination: str, global_definitions: dict) -> None:
         self.data = data
         self.destination = destination
         self.type = resource_type
-        self.definitions = definitions
+        self.global_definitions = global_definitions
         self.resources = []
         self.local_path = os.path.dirname(__file__)
         self.compile_resources_to_create()
@@ -80,24 +80,26 @@ class ResourceGroup(object):
                 )
 
             for resource_data in _pre_compiled_resources_to_create:
+
+                local_definitions = merge_dict(self.global_definitions, item.get('definitions', {}), clobber=True)
+
                 if resource_data.get('vary_by_namespace'):
-                    namespaces = self.definitions.get('namespaces', [])
+                    namespaces = local_definitions.get('namespaces', [])
 
                     if namespaces == []:
                         raise AttributeError(f"Namespaces missing, required for {resource_data['name']}")
 
                     if not isinstance(namespaces, (list)):
                         raise AttributeError(f'Namespaces definition must be a list {resource_data.id}')
-
                     for namespace in namespaces:
                         resource_data_with_namespace_definition = resource_data.copy()
                         if not resource_data_with_namespace_definition.get('definitions'):
                             resource_data_with_namespace_definition['definitions'] = {}
                         resource_data_with_namespace_definition['definitions']['namespace'] = namespace
-                        self.resources.append(Resource(resource_data_with_namespace_definition, self.type, self.destination, self.definitions))
+                        self.resources.append(Resource(resource_data_with_namespace_definition, self.type, self.destination, local_definitions))
                     continue
                 else:
-                    self.resources.append(Resource(resource_data, self.type, self.destination, self.definitions))
+                    self.resources.append(Resource(resource_data, self.type, self.destination, local_definitions))
 
     def create(self) -> None:
         for resource in self.resources:

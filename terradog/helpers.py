@@ -52,6 +52,7 @@ def render_template(template_name, template_path, target, context, delete_templa
 
 def merge_dict(d, new_data, clobber=False):
     """ accepts new_data (dict) and clobbber (boolean). Merges dictionary with dictionary 'd'. If clobber is True, overwrites value. Defaults to false """
+    d = d.copy()
     for key, value in list(new_data.items()):
         if d.get(key) is None or clobber:
             logging.debug("Setting component data {}: {}".format(key, value))

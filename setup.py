@@ -10,18 +10,12 @@ except ImportError:
           "pip install setuptools).")
     sys.exit(1)
 
-
-class meta(object):
-    __version__ = "0.1.0"
-    __author__ = 'Peak6 Technologies'
-    __author_email__ = 'devops@peak6.com',
-
-
 setup(name='terradog',
-      version=meta.__version__,
-      description='Peak6 Datadog Automation ',
-      author=meta.__author__,
-      author_email=meta.__author_email__,
+      use_scm_version=True,
+      setup_requires=['setuptools_scm'],
+      description='Peak6 Datadog Automation',
+      author='Peak6 Technologies',
+      author_email='devops@peak6.com',
       install_requires=[
            "click>=7.1.2,<8.0.0",
            "coloredlogs>=15.0,<16.0.0",

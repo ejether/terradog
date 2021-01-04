@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import click
 import logging
+import traceback
 import coloredlogs
+
 
 from . import TerraDog
 from .docs import Docs
@@ -23,10 +25,13 @@ def cli(*args, **kwargs):
 def create(**kwargs):
     """ Create All defined Datadog objects in input file to Terraform in output directory """
     coloredlogs.install(level=kwargs.get("log_level"))
-
-    data = parse_yaml_file(kwargs.get('file'))
-    location = kwargs.get('output')
-    TerraDog(data, location).create()
+    try:
+        data = parse_yaml_file(kwargs.get('file'))
+        location = kwargs.get('output')
+        TerraDog(data, location).create()
+    except Exception as e:
+        logger.debug(traceback.format_exc())
+        click.Abort(e)
 
 
 @cli.command()
