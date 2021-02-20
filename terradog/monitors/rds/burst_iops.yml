@@ -16,7 +16,7 @@ message: |
     - Does disk size need to be increased to add IOPS?
     - Was there a recent change to cause increased usage?
     - Is there a bad query somewhere that can be adjusted?
-  ${notification}"
+  ${notifications}"
 type: metric alert
 thresholds: {critical: 25, warning: 40}
 timeout_h: 0
