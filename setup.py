@@ -19,7 +19,7 @@ setup(name='terradog',
       install_requires=[
            "click>=7.1.2,<8.0.0",
            "coloredlogs>=15.0,<16.0.0",
-           "Jinja2==2.11.2",
+           "Jinja2==2.11.3",
            "ruyaml>=0.20.0,<0.21.0",
            "GitPython==3.1.11"
       ],
