@@ -21,7 +21,7 @@ setup(name='terradog',
            "coloredlogs>=15.0,<16.0.0",
            "Jinja2==2.11.3",
            "ruyaml>=0.20.0,<0.21.0",
-           "GitPython==3.1.11"
+           "GitPython==3.1.34"
       ],
       packages=find_packages(
           exclude=['tests']),
